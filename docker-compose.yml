@@ -1,0 +1,28 @@
+version: '2'
+services:
+  nginx:
+    image: "nginx-${APP_NAME}:${TAG}"
+    depends_on:
+      - db
+    links:
+      - php
+  db:
+    image: "db-${APP_NAME}:${TAG}"
+  php:
+    image: "php-${APP_NAME}:${TAG}"
+    links:
+      - redis:cache
+      - db:db
+    depends_on:
+      - redis
+  redis:
+    build:
+      context: ./
+      dockerfile: "./${DOCKER_SOURCE_DIR}/redis/Dockerfile"
+    image: "redis-${APP_NAME}:${TAG}"
+  composer:
+    image: "composer-${APP_NAME}:${TAG}"
+  adminer:
+    image: "adminer-${APP_NAME}:${TAG}"
+    links:
+      - db:db

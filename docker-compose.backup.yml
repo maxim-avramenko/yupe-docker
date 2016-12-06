@@ -1,0 +1,131 @@
+version: '2'
+services:
+  nginx:
+    build:
+      context: ./
+      dockerfile: ./source/nginx/Dockerfile
+    image: "nginx-${APP_NAME}:${TAG}"
+    volumes:
+      - ./pspb-test:/app
+      - ./source/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./source/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./logs:/var/log/nginx
+    restart: always
+    ports:
+      - "21001:80"
+    expose:
+      - "21001"
+    depends_on:
+      - db
+      - dbx
+      - dby
+    links:
+      - php
+    networks:
+      - default
+      - back
+    environment:
+      - VIRTUAL_HOST=pspb.dev
+      - APP_ENV=dev
+  db:
+    build:
+      context: ./
+      dockerfile: ./source/mariadb/Dockerfile
+    image: "db-${APP_NAME}:${TAG}"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./source/mariadb/db_dump/yii_poselkispb_ru:/docker-entrypoint-initdb.d
+    ports:
+      - "21002:3306"
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 123
+      MYSQL_USER: pspb
+      MYSQL_DATABASE: yii_poselkispb_ru
+      MYSQL_PASSWORD: 123
+  dbx:
+    build:
+      context: ./
+      dockerfile: ./source/mariadb/Dockerfile
+    image: "db-${APP_NAME}:${TAG}"
+    volumes:
+      - dbx_data:/var/lib/mysql
+      - ./source/mariadb/db_dump/poselkispb_old:/docker-entrypoint-initdb.d
+    ports:
+      - "21003:3306"
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 123
+      MYSQL_USER: pspb
+      MYSQL_DATABASE: poselkispb_old
+      MYSQL_PASSWORD: 123
+  dby:
+    build:
+      context: ./
+      dockerfile: ./source/mariadb/Dockerfile
+    image: "db-${APP_NAME}:${TAG}"
+    volumes:
+      - dby_data:/var/lib/mysql
+      - ./source/mariadb/db_dump/yandex_realty:/docker-entrypoint-initdb.d
+    ports:
+      - "21004:3306"
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 123
+      MYSQL_USER: pspb
+      MYSQL_DATABASE: yandex_realty
+      MYSQL_PASSWORD: 123
+  php:
+    build:
+      context: ./
+      dockerfile: ./source/php/Dockerfile
+    image: "php-${APP_NAME}:${TAG}"
+    volumes:
+      - ./pspb-test:/app
+      - ./source/php/app/protected/config:/app/protected/config:rw
+    restart: always
+    links:
+      - redis:cache
+      - db:db
+      - dbx:dbx
+      - dby:dby
+    depends_on:
+      - redis
+    environment:
+      PHP_IDE_CONFIG: serverName=pspb.dev
+      XDEBUG_CONFIG: remote_host=10.0.75.1
+  adminer:
+    build:
+      context: ./
+      dockerfile: ./source/adminer/Dockerfile
+    image: "adminer-${APP_NAME}:${TAG}"
+    ports:
+      - "21005:80"
+    links:
+      - db:db
+      - dbx:dbx
+      - dby:dby
+  composer:
+      build:
+        context: ./
+        dockerfile: ./source/composer/Dockerfile
+      image: "composer-${APP_NAME}:${TAG}"
+      restart: 'no'
+      command: install --prefer-dist --dev
+      volumes:
+        - ./pspb-test:/app
+  redis:
+    build:
+      context: ./
+      dockerfile: ./source/redis/Dockerfile
+    image: "redis-${APP_NAME}:${TAG}"
+volumes:
+  db_data:
+    external: false
+  dbx_data:
+    external: false
+  dby_data:
+    external: false
+networks:
+  back:
+    driver: bridge

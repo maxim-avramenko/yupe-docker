@@ -1,0 +1,11 @@
+version: '2'
+services:
+  install-project:
+    build:
+      context: ./
+      dockerfile: "./${DOCKER_SOURCE_DIR}/composer/install/Dockerfile"
+    image: "install-project-test-${APP_NAME}:${TAG}"
+    restart: 'no'
+    command: install --prefer-dist --dev
+    volumes:
+      - "./${APP_DIR}:/app"

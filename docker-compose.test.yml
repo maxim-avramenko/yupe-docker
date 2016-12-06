@@ -1,0 +1,52 @@
+version: '2'
+services:
+  nginx:
+    build:
+      context: ./
+      dockerfile: ./source/nginx/test/Dockerfile
+    volumes:
+      - "./${APP_DIR}:/app"
+      - "./${DOCKER_SOURCE_DIR}/nginx/test/conf.d:/etc/nginx/conf.d:ro"
+      - ./logs/dev:/var/log/nginx
+    restart: always
+    ports:
+      - "${EXTERNAL_WEB_TEST_PORT}:80"
+    env_file:
+      - ./env/test/nginx.env
+  db:
+    build:
+      context: ./
+      dockerfile: ./source/mariadb/test/Dockerfile
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./source/mariadb/db_dump/db_yupe:/docker-entrypoint-initdb.d
+    restart: always
+    env_file:
+      - ./env/test/db.env
+  php:
+    build:
+      context: ./
+      dockerfile: ./source/php/test/Dockerfile
+    volumes:
+      - "./${APP_DIR}:/app"
+      - ./source/php/test/app/protected/config:/app/protected/config:rw
+    restart: always
+    env_file:
+      - ./env/test/php.env
+  composer:
+    build:
+      context: ./
+      dockerfile: ./source/composer/test/Dockerfile
+    restart: 'no'
+    command: install --prefer-dist --dev
+    volumes:
+      - "./${APP_DIR}:/app"
+  adminer:
+    build:
+      context: ./
+      dockerfile: ./source/adminer/Dockerfile
+    ports:
+      - "${EXTERNAL_ADMINER_TEST_PORT}:80"
+volumes:
+  db_data:
+    external: false
