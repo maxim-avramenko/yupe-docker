@@ -193,8 +193,9 @@ XDEBUG не доступен в production окружении, xdebug устан
     
 Docker начнет сборку development окружение и проект будет доступен в браузере по адресу [http://localhost:7771](http://localhost:7771)
 
-Для запуска приложения в production окружении скопируйте конфигурацию приложения в папку ./source/prod/app/protected/config и выполните команду:
+Для запуска приложения в production окружении скопируйте конфигурацию приложения ./app/protected/config в папку ./source/php/prod/app/protected и только потом запускайте сборку окружения:
  
+    user@host:~/yupe-docker# cp ./app/protected/config ./source/php/prod/app/protected -R
     user@host:~/yupe-docker# docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
     
 Docker соберет production окружение и проект будет доступен в браузере по адресу [http://localhost:7781](http://localhost:7781)

@@ -38,7 +38,7 @@ services:
       context: ./
       dockerfile: ./source/composer/dev/Dockerfile
     restart: 'no'
-    command: install --prefer-dist --dev
+    command: update --prefer-dist --dev
     volumes:
       - "./${APP_DIR}:/app"
   adminer:
