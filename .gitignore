@@ -1,3 +1,4 @@
 .idea
 .vagrant
 logs
+/env/dev/php.env

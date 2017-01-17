@@ -6,6 +6,6 @@ services:
       dockerfile: "./${DOCKER_SOURCE_DIR}/composer/install/Dockerfile"
     image: "install-project-dev-${APP_NAME}:${TAG}"
     restart: 'no'
-    command: "install --prefer-dist --dev"
+    command: "install --prefer-dist"
     volumes:
       - "./${APP_DIR}:/app"

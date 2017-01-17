@@ -8,9 +8,8 @@ services:
       - "./${APP_DIR}:/app"
       - "./${DOCKER_SOURCE_DIR}/nginx/test/conf.d:/etc/nginx/conf.d:ro"
       - ./logs/dev:/var/log/nginx
-    restart: always
-    ports:
-      - "${EXTERNAL_WEB_TEST_PORT}:80"
+    expose:
+      - 80
     env_file:
       - ./env/test/nginx.env
   db:
@@ -20,7 +19,6 @@ services:
     volumes:
       - db_data:/var/lib/mysql
       - ./source/mariadb/db_dump/db_yupe:/docker-entrypoint-initdb.d
-    restart: always
     env_file:
       - ./env/test/db.env
   php:
@@ -30,15 +28,13 @@ services:
     volumes:
       - "./${APP_DIR}:/app"
       - ./source/php/test/app/protected/config:/app/protected/config:rw
-    restart: always
     env_file:
       - ./env/test/php.env
   composer:
     build:
       context: ./
       dockerfile: ./source/composer/test/Dockerfile
-    restart: 'no'
-    command: install --prefer-dist --dev
+    command: install --prefer-dist
     volumes:
       - "./${APP_DIR}:/app"
   adminer:
