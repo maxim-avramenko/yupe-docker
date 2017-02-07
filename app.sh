@@ -208,7 +208,7 @@ install(){
 update(){
     if [ -d "$APP_DIR" ]; then
         echo "Running: composer update"
-        docker run --rm --interactive --tty --volume "$COMPOSER_APP_PATH/yupe:/app:rw" --name "yupe-composer"  composer update --no-interaction --prefer-dist --no-dev
+        docker run --rm --interactive --tty --volume "$COMPOSER_APP_PATH/yupe:/app:rw" --name "yupe-composer"  composer update --no-interaction --prefer-dist"$COMPOSER_DEV"
     else
         echo "Error: can't update, no app folder. Please, create app, run: ./app.sh create"
     fi
