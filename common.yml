@@ -1,0 +1,34 @@
+version: '2'
+services:
+  nginx:
+    image: "${APP_NAME}-nginx:${TAG}"
+    restart: always
+    depends_on:
+      - php
+    links:
+      - php
+  php:
+    restart: always
+    links:
+      - redis:cache
+      - db:db
+    depends_on:
+      - redis
+      - db
+  redis:
+    image: "${APP_NAME}-redis:${TAG}"
+    build:
+      context: ./
+      dockerfile: "./docker/source/redis/Dockerfile"
+    restart: always
+  db:
+    image: "${APP_NAME}-db:${TAG}"
+    restart: always
+  composer:
+    image: "${APP_NAME}-composer:${TAG}"
+    restart: "no"
+  adminer:
+    image: "${APP_NAME}-adminer:${TAG}"
+    restart: always
+    links:
+      - db:db
