@@ -43,7 +43,8 @@
     ./app.sh create
     ./app.sh up
 
-После выполнения данной команды будет вот такая картинка [https://docs.yupe.ru/img/yupe-install-1.png](https://docs.yupe.ru/img/yupe-install-1.png)
+После выполнения данной команды будет вот такая картинка
+![yupe install screen text https://docs.yupe.ru/img/yupe-install-1.png](https://docs.yupe.ru/img/yupe-install-1.png)
 Помощь
 ------
 Документация
