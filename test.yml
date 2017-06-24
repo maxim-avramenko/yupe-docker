@@ -33,13 +33,6 @@ services:
       - "./docker/env/test/XDEBUG_CONFIG.env"
       - "./docker/env/test/PHP_IDE_CONFIG.env"
       - "./docker/env/test/APP_ENV.env"
-  composer:
-    build:
-      context: ./
-      dockerfile: ./docker/source/composer/test/Dockerfile
-    command: update --prefer-dist
-    volumes:
-      - "./app/yupe:/app"
   adminer:
     build:
       context: ./

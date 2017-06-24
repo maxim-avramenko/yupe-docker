@@ -36,13 +36,6 @@ services:
       - "./docker/env/dev/XDEBUG_CONFIG.env"
       - "./docker/env/dev/PHP_IDE_CONFIG.env"
       - "./docker/env/dev/APP_ENV.env"
-  composer:
-    build:
-      context: ./
-      dockerfile: "./docker/source/composer/dev/Dockerfile"
-    command: "update --prefer-dist"
-    volumes:
-      - "./${APP_DIR}/yupe:/app"
   adminer:
     build:
       context: ./

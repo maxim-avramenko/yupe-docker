@@ -24,9 +24,6 @@ services:
   db:
     image: "${APP_NAME}-db:${TAG}"
     restart: always
-  composer:
-    image: "${APP_NAME}-composer:${TAG}"
-    restart: "no"
   adminer:
     image: "${APP_NAME}-adminer:${TAG}"
     restart: always

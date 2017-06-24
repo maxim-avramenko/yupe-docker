@@ -34,14 +34,6 @@ services:
       - "./docker/source/php/prod/app/protected/config:/app/protected/config:rw"
     env_file:
       - "./docker/env/prod/APP_ENV.env"
-  composer:
-    build:
-      context: ./
-      dockerfile: "./docker/source/composer/prod/Dockerfile"
-    restart: 'no'
-    command: "update --prefer-dist --no-dev"
-    volumes:
-      - "./${APP_DIR}:/app"
   adminer:
     build:
       context: ./

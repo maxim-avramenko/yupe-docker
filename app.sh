@@ -214,11 +214,11 @@ update(){
     fi
 }
 db-backup(){
-    echo "Staring backup DB to Amazon S3 cloud"
+    echo "Backup DB to Amazon S3 cloud"
     docker run --rm --env-file ./docker/env/s3.env --env-file ./docker/env/db-backup.env --volumes-from yupedocker_db_1 --name dockup tutum/dockup:latest
 }
 db-restore(){
-    echo "Staring backup DB to Amazon S3 cloud"
+    echo "Restore DB from Amazon S3 cloud"
     docker run --rm --env-file ./docker/env/s3.env --env-file ./docker/env/db-restore.env --volumes-from yupedocker_db_1 --name dockup tutum/dockup:latest
 }
 self-destroy(){
