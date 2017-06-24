@@ -37,7 +37,7 @@ services:
   adminer:
     build:
       context: ./
-      dockerfile: "./source/adminer/Dockerfile"
+      dockerfile: "./docker/source/adminer/Dockerfile"
     ports:
       - "${EXTERNAL_ADMINER_PROD_PORT}:80"
 volumes:
