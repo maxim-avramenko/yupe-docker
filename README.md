@@ -20,25 +20,31 @@
 
 ### Возможности ./yupe: ###
 
-    Supported commands:
-    ====================================================================================================
-    set-env           - set application environment [dev | prod | test]
-    check-env         - print message with current application environment name
-    check-config      - check current environment configuration .yml file
-    start             - start application environment
-    ps                - list of working containers in current environment
-    stop              - stop application environment
-    restart           - restart application environment
-    build             - build docker containers for application
-    build-nocache     - force build docker containers for application without docker cached images
-    create            - create Yupe! application in ./app directory with --no-install key, just create
-    install           - composer install --prefer-dist, + --no-dev key on prod environment
-    update            - composer update  --prefer-dist, + --no-dev key on prod environment
-    db-backup         - s3cli backup database to Amazon S3
-    db-restore        - s3cli restore database form Amazon S3
-    ====================================================================================================
+    $ ./yupe
+    usage: ./yupe [set-env] [check-env] [check-config]
+                  [build] [build-nocache] [create] [install] [update]
+                  [start] [stop] [ps] [restart] [db-backup] [db-restore]
+
+    description:
+          set-env           - set application environment [dev | prod | test]
+          check-env         - print message with current application environment name
+          check-config      - check current environment configuration .yml file
+          build             - build docker containers for application
+          build-nocache     - force build docker containers for application without docker cached images
+          create            - create Yupe! application in ./app directory with --no-install key, just create
+          install           - composer install --prefer-dist, + --no-dev key on prod environment
+          update            - composer update  --prefer-dist, + --no-dev key on prod environment
+          start             - start application environment
+          stop              - stop application environment
+          restart           - restart application environment
+          ps                - list of working containers in current environment
+          db-backup         - s3cli backup database to Amazon S3
+          db-restore        - s3cli restore database form Amazon S3
+
+
     Для определения в каком окружении должно работать приложение выполните: './yupe set-env [ dev | prod | test ]'
-    ====================================================================================================
+
+    See ./yupe --help to read about all commands.
     
 Для Быстрого старта выполните в консоле:
     
