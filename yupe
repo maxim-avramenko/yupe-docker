@@ -9,9 +9,9 @@ showHelp() {
     echo "set-env           - set application environment [dev | prod | test]"
     echo "check-env         - print message with current application environment name"
     echo "check-config      - check current environment configuration .yml file"
-    echo "up                - start application environment"
+    echo "start             - start application environment"
     echo "ps                - list of working containers in current environment"
-    echo "down              - stop application environment"
+    echo "stop              - stop application environment"
     echo "restart           - restart application environment"
     echo "build             - build docker containers for application"
     echo "build-nocache     - force build docker containers for application without docker cached images"
@@ -21,7 +21,7 @@ showHelp() {
     echo "db-backup         - s3cli backup database to Amazon S3"
     echo "db-restore        - s3cli restore database form Amazon S3"
     echo "===================================================================================================="
-    echo "Для определения в каком окружении должно работать приложение выполните: './app.sh set-env [ dev | prod | test ]'"
+    echo "Для определения в каком окружении должно работать приложение выполните: './yupe set-env [ dev | prod | test ]'"
     echo "===================================================================================================="
 
 }
@@ -81,15 +81,15 @@ check-dir(){
     if [ ! -d "$APP_DIR" ]; then
         # Control will enter here if $DIRECTORY doesn't exist.
         echo "Please, install your application to ./app folder."
-        echo "To create app run command: ./app.sh create"
-        echo "To install/update app dependency run command: ./app.sh [ install | update ]"
+        echo "To create app run command: ./yupe create"
+        echo "To install/update app dependency run command: ./yupe [ install | update ]"
         exit 1
     fi
 }
 # проверка наличие файла со значением переменной окружения
 check-env(){
     if [ ! -f ./docker/env/app_env ]; then
-        echo "missing ./docker/env/app_env file, please create application environment file, use command './app.sh set-env [ dev | prod | test ]'"
+        echo "missing ./docker/env/app_env file, please create application environment file, use command './yupe set-env [ dev | prod | test ]'"
         exit 1
     else
         environment
@@ -141,14 +141,14 @@ ps(){
     docker-compose -f common.yml -f $CURRENT_ENV.yml ps
 }
 
-up(){
+start(){
     check-dir
     echo "Start Yupe! in $CURRENT_ENV environment"
     docker-compose -f common.yml -f $CURRENT_ENV.yml up -d
     ps
     echo 'Please, see logs above to find out environment container status.'
 }
-down(){
+stop(){
     check-dir
     echo "Stop Yupe! in $CURRENT_ENV environment"
     docker-compose -f common.yml -f $CURRENT_ENV.yml down
@@ -210,7 +210,7 @@ update(){
         echo "Running: composer update"
         docker run --rm --interactive --tty --volume "$COMPOSER_APP_PATH/yupe:/app:rw" --name "yupe-composer"  composer update --no-interaction --prefer-dist"$COMPOSER_DEV"
     else
-        echo "Error: can't update, no app folder. Please, create app, run: ./app.sh create"
+        echo "Error: can't update, no app folder. Please, create app, run: ./yupe create"
     fi
 }
 db-backup(){
@@ -224,7 +224,7 @@ db-restore(){
 self-destroy(){
     echo "Yupe self destroy program activated. Good By all Files and Data! Hello New World!"
     check-env
-    down
+    stop
     rm ./app -rf
     rm ./docker/source/php/dev/app/protected/config -rf
     rm ./docker/source/php/prod/app/protected/config -rf

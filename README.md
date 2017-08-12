@@ -2,6 +2,11 @@
 ----------------------------------
 Репозиторий предназначен для быстрого старта Yupe! CMF в Docker контейнерах.
 
+Для заупска bash скрипта управления Yupe приложением в Docker контейнерах необходимо дать файлу "yupe" права на исполнение:
+
+        chmod +x yupe
+
+
 Для работы с репозиторием необходимы:
 - [Docker](https://docs.docker.com/engine/installation/)
 - [docker-compose](https://docs.docker.com/compose/install/)
@@ -13,16 +18,16 @@
  - prod
  - test
 
-### Возможности ./app.sh: ###
+### Возможности ./yupe: ###
 
     Supported commands:
     ====================================================================================================
     set-env           - set application environment [dev | prod | test]
     check-env         - print message with current application environment name
     check-config      - check current environment configuration .yml file
-    up                - start application environment
+    start             - start application environment
     ps                - list of working containers in current environment
-    down              - stop application environment
+    stop              - stop application environment
     restart           - restart application environment
     build             - build docker containers for application
     build-nocache     - force build docker containers for application without docker cached images
@@ -32,7 +37,7 @@
     db-backup         - s3cli backup database to Amazon S3
     db-restore        - s3cli restore database form Amazon S3
     ====================================================================================================
-    Для определения в каком окружении должно работать приложение выполните: './app.sh set-env [ dev | prod | test ]'
+    Для определения в каком окружении должно работать приложение выполните: './yupe set-env [ dev | prod | test ]'
     ====================================================================================================
     
 Для Быстрого старта выполните в консоле:
@@ -44,16 +49,19 @@
 Содержимое команды ./init.dev.sh
 
     #!/usr/bin/env bash
-    ./app.sh set-env dev
-    ./app.sh create
-    ./app.sh up
+    ./yupe set-env dev
+    ./yupe create
+    ./yupe up
 
-После выполнения данной команды будет вот такая картинка
+После выполнения команды ./init.dev.sh будет вот такая картинка
+
 ![yupe install screen text https://docs.yupe.ru/img/yupe-install-1.png](https://docs.yupe.ru/img/yupe-install-1.png)
+
 
 Помощь
 ------
-Документация
+
+Документация:
 - [Docker](https://docs.docker.com/)
 - [docker-compose](https://docs.docker.com/compose/overview/)
 - [Git](https://git-scm.com/downloads)
