@@ -1,15 +1,19 @@
 # Yupe! CMF in Docker containers #
 ----------------------------------
-Данный репозиторий предназначен для быстрого старта Yupe! CMF в Docker контейнерах.
+Репозиторий предназначен для быстрого старта Yupe! CMF в Docker контейнерах.
 
-Для работы с данным репозиторием необходимы:
-- Docker
-- docker-compose
-- Git
+Для работы с репозиторием необходимы:
+- [Docker](https://docs.docker.com/engine/installation/)
+- [docker-compose](https://docs.docker.com/compose/install/)
+- [Git](https://git-scm.com/downloads)
 
-Данный репозиторий представляет из себя набор конфигурационных файлов docker-compose для запуска Yupe! (и не только) в различных окружениях [ dev | prod | test ]
 
-### Возможности: ###
+Репозиторий представляет из себя набор конфигурационных файлов docker-compose для запуска Yupe! в различных окружениях:
+ - dev
+ - prod
+ - test
+
+### Возможности ./app.sh: ###
 
     Supported commands:
     ====================================================================================================
@@ -31,12 +35,13 @@
     Для определения в каком окружении должно работать приложение выполните: './app.sh set-env [ dev | prod | test ]'
     ====================================================================================================
     
-Для Быстрого старта выполните команду:
+Для Быстрого старта выполните в консоле:
     
     ./init.dev.sh
     
 Скрипт создает dev окружение, скачивает и запускает Yupe! на [http://localhost:7771](http://localhost:7771)
-Содержимое команды inid.dev.sh
+
+Содержимое команды ./init.dev.sh
 
     #!/usr/bin/env bash
     ./app.sh set-env dev
@@ -45,10 +50,12 @@
 
 После выполнения данной команды будет вот такая картинка
 ![yupe install screen text https://docs.yupe.ru/img/yupe-install-1.png](https://docs.yupe.ru/img/yupe-install-1.png)
+
 Помощь
 ------
 Документация
 - [Docker](https://docs.docker.com/)
 - [docker-compose](https://docs.docker.com/compose/overview/)
+- [Git](https://git-scm.com/downloads)
 - [Yupe](https://docs.yupe.ru/)
  
