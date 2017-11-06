@@ -23,26 +23,24 @@
     $ ./yupe
     usage: ./yupe [set-env] [check-env] [check-config]
                   [build] [build-nocache] [create] [install] [update]
-                  [start] [stop] [ps] [restart] [db-backup] [db-restore]
+                  [start] [stop] [restart] [ps]
 
     description:
-          set-env           - set application environment [dev | prod | test]
-          check-env         - print message with current application environment name
-          check-config      - check current environment configuration .yml file
-          build             - build docker containers for application
-          build-nocache     - force build docker containers for application without docker cached images
-          create            - create Yupe! application in ./app directory with --no-install key, just create
-          install           - composer install --prefer-dist, + --no-dev key on prod environment
-          update            - composer update  --prefer-dist, + --no-dev key on prod environment
-          start             - start application environment
-          stop              - stop application environment
-          restart           - restart application environment
-          ps                - list of working containers in current environment
-          db-backup         - s3cli backup database to Amazon S3
-          db-restore        - s3cli restore database form Amazon S3
+        set-env           - set application environment [ dev | prod ]
+        check-env         - print message with current application environment name
+        check-config      - check current environment docker-compose configuration files
+        build             - build docker containers for application
+        build-nocache     - force build docker containers for application without docker cached images
+        create            - create Yupe!1.1 application in ./app directory with --no-install key, just create
+        install           - docker exec -it yupedocker_php_1 composer install
+        update            - composer update  --lock
+        start             - start application environment
+        stop              - stop application environment
+        restart           - restart application environment
+        ps                - list of working containers in current environment
 
 
-    Для определения в каком окружении должно работать приложение выполните: './yupe set-env [ dev | prod | test ]'
+    Для определения в каком окружении должно работать приложение выполните: ./yupe set-env [ dev | prod ]
 
     See ./yupe --help to read about all commands.
     
@@ -57,7 +55,7 @@
     #!/usr/bin/env bash
     ./yupe set-env dev
     ./yupe create
-    ./yupe up
+    ./yupe start
 
 После выполнения команды ./init.dev.sh будет вот такая картинка
 
