@@ -10,13 +10,12 @@
 Для работы с репозиторием необходимы:
 - [Docker](https://docs.docker.com/engine/installation/)
 - [docker-compose](https://docs.docker.com/compose/install/)
-- [Git](https://git-scm.com/downloads)
+- [Git](https://git-scm.com/downloads) (см. установку на windows ниже)
 
 
 Репозиторий представляет из себя набор конфигурационных файлов docker-compose для запуска Yupe! в различных окружениях:
  - dev
  - prod
- - test
 
 ### Возможности ./yupe: ###
 
@@ -69,8 +68,16 @@ See ./yupe --help to read about all commands.
 
 Помощь
 ------
+Установка [Git](https://git-scm.com/downloads) на Windows требует определенной настройки что бы работал ./yupe bash скрипт в Windows среде:
+
+- отмечаем все галочки на первом шаге установки компонентов (Select components)
+- Use Git from Windows Command prompt
+- Use OpenSSH
+- Use the OpenSSL library
+- Checkout as-is, commit Unix-style endings (ВАЖНО! Без этого Windows стянет bash скрипт и изменит перенос строк файлов проекта, при сборке контейнеров выдаст ошибку о том что файлы имеют Windows перенос строк)
 
 Документация:
+------------
 - [Docker](https://docs.docker.com/)
 - [docker-compose](https://docs.docker.com/compose/overview/)
 - [Git](https://git-scm.com/downloads)
