@@ -23,7 +23,8 @@
     $ ./yupe
     usage: ./yupe [set-env] [check-env] [check-config]
                   [build] [build-nocache] [create] [install] [update]
-                  [start] [stop] [restart] [ps]
+                  [start] [stop] [restart] [ps] [fix-chown] [fix-chmod]
+                  [copy-config]
 
     description:
         set-env           - set application environment [ dev | prod ]
@@ -34,15 +35,19 @@
         create            - create Yupe!1.1 application in ./app directory with --no-install key, just create
         install           - docker exec -it yupedocker_php_1 composer install
         update            - composer update  --lock
+        migrate           - php yii migrate --interactive=0
         start             - start application environment
         stop              - stop application environment
         restart           - restart application environment
         ps                - list of working containers in current environment
+        fix-chown         - change owner to current user (only on Linux and Mac OS) Windows dont need this
+        fix-chmod         - change a+rw assets, upload, runtime, config e.t.c.
+        copy-config       - copy yupe config folder
 
 
-    Для определения в каком окружении должно работать приложение выполните: ./yupe set-env [ dev | prod ]
+Для определения в каком окружении должно работать приложение выполните: ./yupe set-env [ dev | prod ]
 
-    See ./yupe --help to read about all commands.
+See ./yupe --help to read about all commands.
     
 Для Быстрого старта выполните в консоле:
     
