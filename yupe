@@ -87,6 +87,25 @@ check-dir(){
         exit 1
     fi
 }
+
+alive(){
+  echo "Setting up new application environment to: dev"
+  if [ -f ./docker/env/app_env ]; then
+      CURRENT_ENV=`cat ./docker/env/app_env`
+      docker-compose -f common.yml -f dev.yml down
+  fi
+  cp ./docker/env/dev/app_env ./docker/env/app_env
+  echo "Success"
+  check-env
+  create
+  install
+  check-dir
+  docker-compose -f common.yml -f $CURRENT_ENV.yml build
+  chmod 777 ./docker/source/php/dev/app/protected/config/
+  chmod 777 ./docker/source/php/dev/app/protected/config/db.php
+  start
+}
+
 # проверка наличие файла со значением переменной окружения
 check-env(){
     if [ ! -f ./docker/env/app_env ]; then
