@@ -279,6 +279,9 @@ fix-chmod(){
         chmod a+rw ./app/yupe/public/assets ./app/yupe/public/uploads ./app/yupe/protected/runtime -R
         chmod a+rw ./docker/source/php/prod/app/protected/config/modules ./docker/source/php/prod/app/protected/config/modulesBack
         chmod a+rw ./docker/source/php/dev/app/protected/config/modules ./docker/source/php/dev/app/protected/config/modulesBack
+        #тут исправление проблеммы, которая возникала при попытке установить CMS Yupe из за нехватки прав на запись
+        chmod 777 ./docker/source/php/dev/app/protected/config/
+        chmod 777 ./docker/source/php/dev/app/protected/config/db.php
         ;;
     esac
 }
