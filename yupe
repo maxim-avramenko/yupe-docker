@@ -88,6 +88,7 @@ check-dir(){
     fi
 }
 
+#Устанавливает полностью yupe-docker в dev окружении, исправляет проблемму которая возникала из за прав доступа к config/db.php при установке CMS
 alive(){
   echo "Setting up new application environment to: dev"
   if [ -f ./docker/env/app_env ]; then
