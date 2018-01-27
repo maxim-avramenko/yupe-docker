@@ -42,6 +42,124 @@ services:
       dockerfile: "./docker/source/adminer/Dockerfile"
     ports:
       - "${EXTERNAL_ADMINER_DEV_PORT}:80"
+  caddy:
+    image: stefanprodan/caddy
+    container_name: caddy
+    ports:
+      - "13003:3000"
+      - "19090:9090"
+      - "19093:9093"
+    volumes:
+      - ./dockermonitoring/caddy/:/etc/caddy/
+    links:
+      - php:php
+      - db:db
+      - adminer:adminer
+      - nginx:nginx
+      - grafana:grafana
+      - prometheus:prometheus
+      - alertmanager:alertmanager
+      - cadvisor:cadvisor
+    environment:
+      - ADMIN_USER=admin
+      - ADMIN_PASSWORD=admin
+    restart: always
+    labels:
+      org.label-schema.group: "monitoring"
+  grafana:
+    image: grafana/grafana:4.5.2
+    container_name: grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./dockermonitoring/grafana/datasources:/etc/grafana/datasources
+      - ./dockermonitoring/grafana/dashboards:/etc/grafana/dashboards
+      - ./dockermonitoring/grafana/setup.sh:/setup.sh
+    entrypoint: /setup.sh
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: always
+    expose:
+      - 3000
+    ports:
+      - 3001:3000
+    labels:
+      org.label-schema.group: "monitoring"
+  prometheus:
+    image: prom/prometheus:v2.0.0
+    container_name: prometheus
+    volumes:
+      - ./dockermonitoring/prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention=200h'
+      - '--web.enable-lifecycle'
+    # restart: unless-stopped
+    expose:
+      - 9090
+    ports:
+      - 9090:9090
+    labels:
+      org.label-schema.group: "monitoring"
+  alertmanager:
+    image: prom/alertmanager:v0.13.0
+    container_name: alertmanager
+    volumes:
+      - ./dockermonitoring/alertmanager/:/etc/alertmanager/
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+    restart: always
+    expose:
+      - 9093
+    ports:
+      - 9093:9093
+    labels:
+      org.label-schema.group: "monitoring"
+  nodeexporter:
+    image: prom/node-exporter:v0.15.2
+    container_name: nodeexporter
+    user: root
+    privileged: true
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+    restart: always
+    expose:
+      - 9100
+    ports:
+      - 9100:9100
+    labels:
+      org.label-schema.group: "monitoring"
+  cadvisor:
+    image: google/cadvisor:v0.28.3
+    container_name: cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    restart: always
+    expose:
+      - 8080
+    ports:
+      - 29999:8080
+    labels:
+      org.label-schema.group: "monitoring"
 volumes:
   db_data:
+    external: false
+  prometheus_data:
+    external: false
+  grafana_data:
     external: false
