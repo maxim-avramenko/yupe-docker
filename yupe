@@ -104,6 +104,13 @@ alive(){
   docker-compose -f common.yml -f $CURRENT_ENV.yml build
   sudo chmod -R 777 ./docker/source/php/dev/app/protected/config/
   chmod 777 ./docker/source/php/dev/app/protected/config/db.php
+  
+  echo "Starting installing Monitor System..."
+git clone https://github.com/loisoj/dockermonitoring
+cd dockermonitoring
+docker-compose up -d
+docker ps
+  
   start
 }
 
