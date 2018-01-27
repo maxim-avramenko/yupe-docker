@@ -2,6 +2,10 @@
 ----------------------------------
 Репозиторий предназначен для быстрого старта Yupe! CMF в Docker контейнерах.
 
+Быстрый старт Yupe! CMF в dev окружении с мониторами grafana, prometheus, alertmanager, nodeexporter, cadvisor:
+
+    git clone https://github.com/maxim-avramenko/yupe-docker.git && cd yupe-docker && chmod +x yupe && ./yupe set-env dev && ./yupe alive
+
 Для заупска bash скрипта управления Yupe приложением в Docker контейнерах необходимо дать файлу "yupe" права на исполнение:
 
         chmod +x yupe
