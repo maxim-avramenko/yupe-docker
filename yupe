@@ -103,13 +103,12 @@ alive(){
   check-dir
   docker-compose -f common.yml -f $CURRENT_ENV.yml build
   sudo chmod -R 777 ./docker/source/php/dev/app/protected/config/
-  chmod 777 ./docker/source/php/dev/app/protected/config/db.php
-  #ПОКА НЕ СНИМАТЬ КОММЕНТАРИЙ
-  #Запускает или скачивает и запускает мониторинг всех контейнеров(на будушее может мониторить эластик):
-  #Нужно разобраться с соединением с mysql сервером, в данный момент сам образ стартует, но-
-  #выплевывает огибку 'dial tcp [::1]:3306: getsockopt: connection refused' при попытке соедениться с БД
-  #docker run -d -p 3000:3000 \ -v /var/lib/grafana:/var/lib/grafana \ -e "GF_SECURITY_ADMIN_PASSWORD=secret" \ grafana/grafana 
-  #Оставил закаментированным что бы был под рукой
+  chmod 777 ./docker/source/php/dev/app/protected/config/db.php  
+  echo "Starting installing Monitor System..."
+  git clone https://github.com/loisoj/dockermonitoring
+  cd dockermonitoring
+  docker-compose up -d
+  docker ps
   start
 }
 
@@ -249,7 +248,7 @@ update(){
 #    echo "Restore DB from Amazon S3 cloud"
 #    docker run --rm --env-file ./docker/env/s3.env --env-file ./docker/env/db-restore.env --volumes-from yupedocker_db_1 --name dockup tutum/dockup:latest
 #}
-#elf-destroy(){
+#self-destroy(){
 #    echo "Yupe self destroy program activated. Good By all Files and Data! Hello New World!"
 #    check-env
 #    stop
