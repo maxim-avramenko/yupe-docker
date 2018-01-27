@@ -103,15 +103,26 @@ alive(){
   check-dir
   docker-compose -f common.yml -f $CURRENT_ENV.yml build
   sudo chmod -R 777 ./docker/source/php/dev/app/protected/config/
-  chmod 777 ./docker/source/php/dev/app/protected/config/db.php
-  
+  chmod 777 ./docker/source/php/dev/app/protected/config/db.php  
   echo "Starting installing Monitor System..."
+  git clone https://github.com/loisoj/dockermonitoring
+  cd dockermonitoring
+  docker-compose up -d
+  docker ps
+  start
+}
+
+#полный мониторинг всех контейнеров
+#Как это работает:
+#Prometheus (метрическая база данных) http://localhost:9090
+#AlertManager (управление оповещениями) http://localhost:9093
+#Grafana (визуализация метрик) http://localhost:3000
+#NodeExporter (сборщик хостовых метрик);
+#cAdvisor (сборщик метрик контейнеров).
+get-monitor(){
 git clone https://github.com/loisoj/dockermonitoring
 cd dockermonitoring
 docker-compose up -d
-docker ps
-  
-  start
 }
 
 # проверка наличие файла со значением переменной окружения
@@ -237,7 +248,7 @@ update(){
 #    echo "Restore DB from Amazon S3 cloud"
 #    docker run --rm --env-file ./docker/env/s3.env --env-file ./docker/env/db-restore.env --volumes-from yupedocker_db_1 --name dockup tutum/dockup:latest
 #}
-#elf-destroy(){
+#self-destroy(){
 #    echo "Yupe self destroy program activated. Good By all Files and Data! Hello New World!"
 #    check-env
 #    stop
