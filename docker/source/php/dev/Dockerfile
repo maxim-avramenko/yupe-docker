@@ -1,11 +1,14 @@
 FROM php:7.0-fpm
 
-COPY ./docker/source/php/dev/config/php.ini /usr/local/etc/php/
+COPY ./config/php.ini /usr/local/etc/php/
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
+        g++ \
         git \
         curl \
+        wget \
         apt-utils \
+        libxml2 \
         libfreetype6-dev \
         libjpeg62-turbo-dev \
         libmcrypt-dev \
@@ -23,6 +26,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         opcache \
         pdo \
         pdo_mysql \
+        zip \
+        intl \
+        dom \
+        xml \
     && apt-get clean; rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
 RUN yes | pecl install xdebug \
@@ -31,10 +38,14 @@ RUN yes | pecl install xdebug \
     && echo "xdebug.remote_autostart=off" >> /usr/local/etc/php/conf.d/xdebug.ini \
     && echo "xdebug.remote_port=9000" >> /usr/local/etc/php/conf.d/xdebug.ini
 
-COPY ./docker/source/php/dev/script/docker-php-sendmail-entrypoint.sh /usr/local/bin/
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+COPY ./script/docker-php-sendmail-entrypoint.sh /usr/local/bin/
 
 RUN chmod 777 /usr/local/bin/docker-php-sendmail-entrypoint.sh
+
 WORKDIR /app
+
 ENTRYPOINT ["docker-php-sendmail-entrypoint.sh"]
 
 CMD ["php-fpm"]

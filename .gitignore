@@ -1,9 +1,9 @@
 .idea
 .vagrant
-logs
+/docker/logs
 /env/dev/php.env
 /docker/env/app_env
-!db.php
 /app/composer.lock
 /docker/env/dev/XDEBUG_CONFIG.env
-/docker/env/test/XDEBUG_CONFIG.env
+/dockermonitoring/
+/monitor/

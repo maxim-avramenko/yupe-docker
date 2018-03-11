@@ -1,165 +1,86 @@
 version: '2'
 services:
   nginx:
+    image: "yupe-nginx:1.2"
+    restart: always
+    depends_on:
+      - php
+    links:
+      - php
     build:
-      context: ./
-      dockerfile: "./docker/source/nginx/dev/Dockerfile"
+      context: "./docker/source/nginx/dev"
+      dockerfile: "./Dockerfile"
     volumes:
-      - "./app/yupe:/app"
+      - "./app:/app"
       - "./docker/source/nginx/dev/conf.d:/etc/nginx/conf.d:ro"
       - "./docker/logs/dev:/var/log/nginx"
     expose:
       - "80"
     ports:
-      - "${EXTERNAL_WEB_DEV_PORT}:80"
-    env_file:
-      - "./docker/env/dev/VIRTUAL_HOST.env"
-      - "./docker/env/dev/APP_ENV.env"
+      - "7771:80"
+    environment:
+      VIRTUAL_HOST: "yupe.local"
+      APP_ENV: "dev"
+    networks:
+      - web
+    labels:
+      - "traefik.backend=nginx"
+      - "traefik.frontend.rule=Host:yupe.local"
   db:
+    image: "yupe-db-dev:1.2"
+    restart: always
     build:
-      context: ./
-      dockerfile: "./docker/source/mariadb/dev/Dockerfile"
+      context: "./docker/source/mariadb/dev"
+      dockerfile: "./Dockerfile"
     volumes:
       - "db_data:/var/lib/mysql"
       - "./docker/source/mariadb/db_dump/db_yupe:/docker-entrypoint-initdb.d"
-    env_file:
-      - "./docker/env/dev/db.env"
+    environment:
+      MYSQL_ROOT_PASSWORD: "123"
+      MYSQL_USER: "yupe"
+      MYSQL_DATABASE: "db_yupe"
+      MYSQL_PASSWORD: "123"
+    networks:
+      - web
+    labels:
+      - "traefik.backend=db"
   php:
-    image: "${APP_NAME}-php-dev:${TAG}"
+    image: "yupe-php-dev:1.2"
     build:
-      context: ./
-      dockerfile: "./docker/source/php/dev/Dockerfile"
+      context: "./docker/source/php/dev"
+      dockerfile: "./Dockerfile"
+    restart: always
+    links:
+      - redis:cache
+      - db:db
+    depends_on:
+      - redis
+      - db
     volumes:
-      - "./app/yupe:/app"
-      - "./docker/source/php/dev/app/protected/config:/app/protected/config:rw"
+      - "./app:/app"
     env_file:
       - "./docker/env/dev/XDEBUG_CONFIG.env"
-      - "./docker/env/dev/PHP_IDE_CONFIG.env"
-      - "./docker/env/dev/APP_ENV.env"
-  adminer:
+    environment:
+      PHP_IDE_CONFIG: "serverName=yupe.local"
+      APP_ENV: "dev"
+    networks:
+      - web
+    labels:
+      - "traefik.backend=php"
+  redis:
+    image: "yupe-redis:1.2"
     build:
-      context: ./
-      dockerfile: "./docker/source/adminer/Dockerfile"
-    ports:
-      - "${EXTERNAL_ADMINER_DEV_PORT}:80"
-  caddy:
-    image: stefanprodan/caddy
-    container_name: caddy
-    ports:
-      - "13003:3000"
-      - "19090:9090"
-      - "19093:9093"
-    volumes:
-      - ./dockermonitoring/caddy/:/etc/caddy/
-    links:
-      - php:php
-      - db:db
-      - adminer:adminer
-      - nginx:nginx
-      - grafana:grafana
-      - prometheus:prometheus
-      - alertmanager:alertmanager
-      - cadvisor:cadvisor
-    environment:
-      - ADMIN_USER=admin
-      - ADMIN_PASSWORD=admin
+      context: "./docker/source/redis"
+      dockerfile: "./Dockerfile"
     restart: always
+    networks:
+      - web
     labels:
-      org.label-schema.group: "monitoring"
-  grafana:
-    image: grafana/grafana:4.5.2
-    container_name: grafana
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./dockermonitoring/grafana/datasources:/etc/grafana/datasources
-      - ./dockermonitoring/grafana/dashboards:/etc/grafana/dashboards
-      - ./dockermonitoring/grafana/setup.sh:/setup.sh
-    entrypoint: /setup.sh
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_USERS_ALLOW_SIGN_UP=false
-    restart: always
-    expose:
-      - 3000
-    ports:
-      - 3001:3000
-    labels:
-      org.label-schema.group: "monitoring"
-  prometheus:
-    image: prom/prometheus:v2.0.0
-    container_name: prometheus
-    volumes:
-      - ./dockermonitoring/prometheus/:/etc/prometheus/
-      - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/etc/prometheus/console_libraries'
-      - '--web.console.templates=/etc/prometheus/consoles'
-      - '--storage.tsdb.retention=200h'
-      - '--web.enable-lifecycle'
-    # restart: unless-stopped
-    expose:
-      - 9090
-    ports:
-      - 9090:9090
-    labels:
-      org.label-schema.group: "monitoring"
-  alertmanager:
-    image: prom/alertmanager:v0.13.0
-    container_name: alertmanager
-    volumes:
-      - ./dockermonitoring/alertmanager/:/etc/alertmanager/
-    command:
-      - '--config.file=/etc/alertmanager/config.yml'
-      - '--storage.path=/alertmanager'
-    restart: always
-    expose:
-      - 9093
-    ports:
-      - 9093:9093
-    labels:
-      org.label-schema.group: "monitoring"
-  nodeexporter:
-    image: prom/node-exporter:v0.15.2
-    container_name: nodeexporter
-    user: root
-    privileged: true
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /:/rootfs:ro
-    command:
-      - '--path.procfs=/host/proc'
-      - '--path.sysfs=/host/sys'
-      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
-    restart: always
-    expose:
-      - 9100
-    ports:
-      - 9100:9100
-    labels:
-      org.label-schema.group: "monitoring"
-  cadvisor:
-    image: google/cadvisor:v0.28.3
-    container_name: cadvisor
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:rw
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-    restart: always
-    expose:
-      - 8080
-    ports:
-      - 29999:8080
-    labels:
-      org.label-schema.group: "monitoring"
+      - "traefik.backend=redis"
 volumes:
   db_data:
     external: false
-  prometheus_data:
-    external: false
-  grafana_data:
-    external: false
+networks:
+  web:
+    external:
+      name: traefik_webgateway

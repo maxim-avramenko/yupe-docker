@@ -1,10 +1,12 @@
 FROM php:7.0-fpm
 
-COPY ./docker/source/php/prod/config/php.ini /usr/local/etc/php/
+COPY ./config/php.ini /usr/local/etc/php/
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
+        g++ \
         git \
         curl \
+        wget \
         apt-utils \
         libfreetype6-dev \
         libjpeg62-turbo-dev \
@@ -23,9 +25,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         opcache \
         pdo \
         pdo_mysql \
+        zip \
+        intl \
+        dom \
+        xml \
     && apt-get clean; rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
-COPY ./docker/source/php/prod/script/docker-php-sendmail-entrypoint.sh /usr/local/bin/
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+COPY ./script/docker-php-sendmail-entrypoint.sh /usr/local/bin/
 
 RUN chmod 777 /usr/local/bin/docker-php-sendmail-entrypoint.sh
 

@@ -1,31 +1,55 @@
 #!/usr/bin/env bash
+#!/usr/bin/env bash
 #==================================================================================
 # имя файла скрипта на всякий случай
 SCRIPT="$0"
 # описание работы скрипнта --help
 showHelp() {
-    echo "usage: ./yupe [set-env] [check-env] [check-config]"
-    echo "              [build] [build-nocache] [create] [install] [update]"
-    echo "              [start] [stop] [restart] [ps] [fix-chown] [fix-chmod]"
-    echo "              [copy-config]"
+    echo "usage:"
+    echo ""
+    echo "Init application with one command:"
+    echo "    ./yupe set-env dev && ./yupe init"
     echo ""
     echo "description:"
+    echo "Environment commands:"
     echo "    set-env           - set application environment [ dev | prod ]"
     echo "    check-env         - print message with current application environment name"
     echo "    check-config      - check current environment docker-compose configuration files"
     echo "    build             - build docker containers for application"
     echo "    build-nocache     - force build docker containers for application without docker cached images"
+    echo ""
+    echo "Yupe 1.2:"
     echo "    create            - create Yupe!1.1 application in ./app directory with --no-install key, just create"
-    echo "    install           - docker exec -it yupedocker_php_1 composer install"
+    echo "    start-app         - start application environment"
+    echo "    stop-app          - stop application environment"
+    echo "    ps-app            - list of working containers in current environment"
+    echo "    restart-app       - restart application environment"
     echo "    update            - composer update  --lock"
     echo "    migrate           - php yii migrate --interactive=0"
-    echo "    start             - start application environment"
-    echo "    stop              - stop application environment"
-    echo "    restart           - restart application environment"
-    echo "    ps                - list of working containers in current environment"
+    echo ""
+    echo "Grafana monitor:"
+    echo "    get-monitor       - get Grafana and monitors"
+    echo "    start-monitor     - start Grafana and monitors"
+    echo "    stop-monitor      - stop Grafana and monitors"
+    echo "    restart-monitor   - restart Grafana and monitors"
+    echo "    ps-monitor        - list of working containers Grafana and monitors"
+    echo ""
+    echo "Yupe 1.2 + Proxy:"
+    echo "    start-app-proxy   - start application environment with proxy"
+    echo "    stop-app-proxy    - stop application environment with proxy"
+    echo "    restart-app-proxy - restart application environment with proxy"
+    echo "    ps-app-proxy      - list of working containers in current environment with proxy"
+    echo ""
+    echo "Yupe 1.2 + Proxy + Grafana:"
+    echo "    start-all         - start Yupe 1.2 + Proxy + Grafana applications environment with proxy"
+    echo "    stop-all          - stop Yupe 1.2 + Proxy + Grafana applications environment with proxy"
+    echo "    restart-all       - restart Yupe 1.2 + Proxy + Grafana applications environment with proxy"
+    echo "    ps-all            - list of working containers Yupe 1.2 + Proxy + Grafana in current environment with proxy"
+    echo ""
+    echo "Fixing application chown and chmod:"
     echo "    fix-chown         - change owner to current user (only on Linux and Mac OS) Windows dont need this"
     echo "    fix-chmod         - change a+rw assets, upload, runtime, config e.t.c."
-    echo "    copy-config       - copy yupe config folder"
+    echo "    fix               - fix-chown and fix-chmod"
     echo ""
     echo ""
     echo "Для определения в каком окружении должно работать приложение выполните: ./yupe set-env [ dev | prod ]"
@@ -79,33 +103,13 @@ fi
 
 # проверка наличия приложения в папке app
 check-dir(){
-    if [ ! -d "$APP_DIR" ]; then
+    if [ ! -d "$APP_DIR"/yupe ]; then
         # Control will enter here if $DIRECTORY doesn't exist.
-        echo "Please, install your application to ./app folder."
+        echo "Please, install your application to ./app/yupe folder."
         echo "To create app run command: ./yupe create"
         echo "To install/update app dependency run command: ./yupe [ install | update ]"
         exit 1
     fi
-}
-
-#Устанавливает полностью yupe-docker в dev окружении, исправляет проблемму которая возникала из за прав доступа к config/db.php при установке CMS
-alive(){
-  echo "Setting up new application environment to: dev"
-  if [ -f ./docker/env/app_env ]; then
-      CURRENT_ENV=`cat ./docker/env/app_env`
-      docker-compose -f common.yml -f dev.yml down
-  fi
-  cp ./docker/env/dev/app_env ./docker/env/app_env
-  echo "Success"
-  check-env
-  create
-  install
-  check-dir
-  git clone https://github.com/loisoj/dockermonitoring
-  sudo chmod -R 777 ./docker/source/php/dev/app/protected/config/
-  chmod 777 ./docker/source/php/dev/app/protected/config/db.php
-  docker-compose -f common.yml -f $CURRENT_ENV.yml build
-  start
 }
 
 #полный мониторинг всех контейнеров
@@ -116,11 +120,24 @@ alive(){
 #NodeExporter (сборщик хостовых метрик);
 #cAdvisor (сборщик метрик контейнеров).
 get-monitor(){
-git clone https://github.com/loisoj/dockermonitoring
-cd dockermonitoring
-docker-compose up -d
+    git clone https://github.com/loisoj/dockermonitoring monitor
+}
+start-monitor(){
+    cd monitor
+    docker-compose up -d
+    cd ..
+}
+stop-monitor(){
+    cd monitor
+    docker-compose down
+    cd ..
 }
 
+ps-monitor(){
+    cd monitor
+    docker-compose ps
+    cd ..
+}
 # проверка наличие файла со значением переменной окружения
 check-env(){
     if [ ! -f ./docker/env/app_env ]; then
@@ -142,7 +159,7 @@ set-env(){
     dev|prod)
         if [ -f ./docker/env/app_env ]; then
             CURRENT_ENV=`cat ./docker/env/app_env`
-            docker-compose -f common.yml -f $CURRENT_ENV.yml down
+            docker-compose -f $CURRENT_ENV.yml down
         fi
         echo "Setting up new application environment to: $NEW_ENV"
         cp ./docker/env/$NEW_ENV/app_env ./docker/env/app_env
@@ -156,113 +173,53 @@ set-env(){
 }
 
 build-nocache(){
-    check-dir
     echo "Building docker images for $CURRENT_ENV environment without cache."
-    docker-compose -f common.yml -f $CURRENT_ENV.yml build --no-cache
+    docker-compose -f $CURRENT_ENV.yml build --no-cache
 }
 
 build(){
-    check-dir
     echo "Building docker images for $CURRENT_ENV environment with cache."
-    docker-compose -f common.yml -f $CURRENT_ENV.yml build
+    docker-compose -f $CURRENT_ENV.yml build
 }
-ps(){
+ps-app(){
     echo "Container status in $CURRENT_ENV environment:"
-    docker-compose -f common.yml -f $CURRENT_ENV.yml ps
+    docker-compose -f $CURRENT_ENV.yml ps
 }
 
-start(){
-    check-dir
+start-app(){
     echo "Start Yupe! in $CURRENT_ENV environment"
-    docker-compose -f common.yml -f $CURRENT_ENV.yml up -d
-    ps
+    docker-compose -f $CURRENT_ENV.yml up -d
     echo ''
 }
-stop(){
-    check-dir
+stop-app(){
     echo "Stop Yupe! in $CURRENT_ENV environment"
-    docker-compose -f common.yml -f $CURRENT_ENV.yml down
-    ps
+    docker-compose -f $CURRENT_ENV.yml down
     echo ''
 }
-restart(){
-    check-dir
+restart-app(){
     echo "Restart Yupe! in $CURRENT_ENV environment"
-    docker-compose -f common.yml -f $CURRENT_ENV.yml down
-    docker-compose -f common.yml -f $CURRENT_ENV.yml up -d
-    ps
+    docker-compose -f $CURRENT_ENV.yml down
+    docker-compose -f $CURRENT_ENV.yml up -d
     echo ''
 }
 
 check-config(){
     echo "Config status in $CURRENT_ENV environment:"
-    docker-compose -f common.yml -f $CURRENT_ENV.yml config
+    docker-compose -f $CURRENT_ENV.yml config
 }
-
-
 
 create(){
-    if [ ! -d "$APP_DIR" ]; then
-        echo "Creating Yupe! 1.1 in ./app/yupe folder and copy config files to ./docker/source/php/[dev && prod]/app/protected/"
-        echo "Running: docker run --rm --interactive --tty --volume "$COMPOSER_CREATE_APP_PATH/app:/app:rw" composer create-project yupe/yupe:1.1 yupe --no-install"
-        docker run --rm --interactive --tty --volume "$COMPOSER_CREATE_APP_PATH/app:/app:rw" --name "yupe-composer" composer create-project yupe/yupe:1.1 yupe --no-install --no-interaction
-        install
-        copy-config
+        echo "Creating Yupe! 1.2 in ./app/yupe folder"
+        echo "Running: docker exec -it yupedocker_php_1 composer create-project yupe/yupe:1.2 yupe --no-interaction"
+        docker exec -it yupedocker_php_1 composer create-project yupe/yupe:1.2 yupe --no-interaction --prefer-dist
         fix-chown
         fix-chmod
-        rm ./docker/source/php/dev/app/protected/config/.gitignore
-        rm ./docker/source/php/prod/app/protected/config/.gitignore
-        rm ./docker/source/php/dev/app/protected/config/modules/.gitignore
-        rm ./docker/source/php/prod/app/protected/config/modules/.gitignore
-    else
-        echo "Error: Can not create application yupe/yupe:1.1 in app dirrectory, it's already in app directory, app dirrectory is not empty. Please, remove app directory to create new app."
-    fi
-}
-
-install(){
-    if [ -d "$APP_DIR" ]; then
-        echo "Running: composer install"
-        docker run --rm --interactive --tty --volume "$COMPOSER_APP_PATH/yupe:/app:rw" --name "yupe-composer" composer install --no-interaction
-    else
-        create
-    fi
 }
 
 update(){
-    if [ -d "$APP_DIR" ]; then
         echo "Running: composer update --lock"
-        docker run --rm --interactive --tty --volume "$COMPOSER_APP_PATH/yupe:/app:rw" --name "yupe-composer"  composer update --lock --no-interaction
-    else
-        echo "Error: can't update, no app folder. Please, create app, run: ./yupe create"
-    fi
+        docker exec -it yupedocker_php_1 composer update --lock --no-interaction
 }
-#db-backup(){
-#    echo "Backup DB to Amazon S3 cloud"
-#    docker run --rm --env-file ./docker/env/s3.env --env-file ./docker/env/db-backup.env --volumes-from yupedocker_db_1 --name dockup tutum/dockup:latest
-#}
-#db-restore(){
-#    echo "Restore DB from Amazon S3 cloud"
-#    docker run --rm --env-file ./docker/env/s3.env --env-file ./docker/env/db-restore.env --volumes-from yupedocker_db_1 --name dockup tutum/dockup:latest
-#}
-#self-destroy(){
-#    echo "Yupe self destroy program activated. Good By all Files and Data! Hello New World!"
-#    check-env
-#    stop
-#    rm ./app -rf
-#    rm ./docker/source/php/dev/app/protected/config -rf
-#    rm ./docker/source/php/prod/app/protected/config -rf
-#    rm ./docker/env/app_env -f
-#    rm ./docker/env/dev/XDEBUG_CONFIG.env -f
-#    echo "There is no Yupe in this project."
-#}
-
-#init(){
-#    echo "Init Yupe application in Development or Production environment"
-#    echo "Running: docker exec -it living_php_1 php init"
-#    docker exec -it living_php_1 php init
-#    chown
-#    chmod
-#}
 
 migrate(){
     echo "Apply application DB migrations"
@@ -272,14 +229,9 @@ migrate(){
 
 fix-chown(){
     case "$PLATFORM" in
-    windows)
-        ;;
     linux|mac)
-        echo "Changing owner application files"
-        sudo chown $USER:$USER -R ./app/yupe
-        #sudo find . -type d -user root -exec chown $USER {} \;
-        #sudo find ! -name ./.git/ ./.gitignore -user root -exec chown $USER {} \;
-        #sudo find . -type f -user root -exec chown $USER {} \;
+        echo "Changing owner application files to current user: $USER"
+        sudo chown $USER:$USER -R .
         ;;
     esac
 }
@@ -290,33 +242,16 @@ fix-chmod(){
         ;;
     linux|mac)
         echo "Changing chmod application files"
-        chmod a+rw ./app/yupe/public/assets ./app/yupe/public/uploads ./app/yupe/protected/runtime -R
-        chmod a+rw ./docker/source/php/prod/app/protected/config/modules ./docker/source/php/prod/app/protected/config/modulesBack
-        chmod a+rw ./docker/source/php/dev/app/protected/config/modules ./docker/source/php/dev/app/protected/config/modulesBack
-        #тут исправление проблеммы, которая возникала при попытке установить CMS Yupe из за нехватки прав на запись
-        sudo chmod -R 777 ./docker/source/php/dev/app/protected/config/
-        sudo chmod -R 777 ./docker/source/php/prod/app/protected/config/
-        chmod 777 ./docker/source/php/dev/app/protected/config/db.php
+        chmod a+rw -R ./app/yupe/public/assets ./app/yupe/public/uploads ./app/yupe/protected/runtime ./app/yupe/protected/config ./app/yupe/vendor ./docker/env ./docker/logs
         ;;
     esac
 }
-prepare-config-folder(){
-    case "$PLATFORM" in
-    windows)
-        ;;
-    linux|mac)
-        echo "Changing chmod application files: ./docker/source/php/dev/app/ ./docker/source/php/prod/app/"
-        chmod a+rw ./docker/source/php/dev/app/ -R
-        chmod a+rw ./docker/source/php/prod/app/ -R
-        ;;
-    esac
 
+fix(){
+    fix-chown
+    fix-chmod
 }
-copy-config(){
-    prepare-config-folder
-    cp ./app/yupe/protected/config/ ./docker/source/php/dev/app/protected/ -R
-    cp ./app/yupe/protected/config/ ./docker/source/php/prod/app/protected/ -R
-}
+
 init-xdebug(){
     if [ ! -f ./docker/env/dev/XDEBUG_CONFIG.env ]; then
         touch ./docker/env/dev/XDEBUG_CONFIG.env
@@ -330,6 +265,92 @@ init-xdebug(){
         esac
     fi
 }
+
+start-proxy(){
+    echo "$(date +%F\ %T) [INFO]: Starting proxy server."
+    echo ""
+    cd docker/source/traefik
+    docker-compose up -d
+    cd ../../../
+    echo "$(date +%F\ %T) [INFO]: Starting proxy server."
+    echo ""
+}
+
+stop-proxy(){
+    echo "$(date +%F\ %T) [INFO]: Stop proxy server."
+    echo ""
+    cd docker/source/traefik
+    docker-compose down
+    cd ../../../
+    echo "$(date +%F\ %T) [INFO]: Proxy stopped!"
+    echo ""
+}
+
+ps-proxy(){
+    echo "$(date +%F\ %T) [INFO]: Proxy status:"
+    cd docker/source/traefik
+    docker-compose ps
+    echo "$(date +%F\ %T) [INFO]: Proxy server status"
+    cd ../../../
+    echo ""
+}
+
+start-app-proxy(){
+    start-proxy
+    start-app
+}
+
+stop-app-proxy(){
+    stop-app
+    stop-proxy
+}
+
+ps-app-proxy(){
+    ps-app
+    ps-proxy
+}
+
+restart-app-proxy(){
+    stop-app-proxy
+    start-app-proxy
+}
+
+start-all(){
+    start-proxy
+    start-app
+    start-monitor
+}
+
+stop-all(){
+    stop-monitor
+    stop-app
+    stop-app-proxy
+}
+
+ps-all(){
+    ps-proxy
+    ps-app
+    ps-monitor
+}
+
+install-adminer(){
+    docker exec -it yupedocker_php_1 wget https://github.com/vrana/adminer/releases/download/v4.6.2/adminer-4.6.2.php
+    docker exec -it yupedocker_php_1 wget https://raw.githubusercontent.com/pepa-linha/Adminer-Design-Dark/master/adminer.css
+    docker exec -it yupedocker_php_1 mv /app/adminer-4.6.2.php /app/yupe/public/adminer.php
+    docker exec -it yupedocker_php_1 mv /app/adminer.css /app/yupe/public/adminer.css
+    fix
+}
+
+logs(){
+    docker-compose -f $CURRENT_ENV.yml logs
+}
+
+init(){
+    build-nocache
+    start-app-proxy
+    create
+    fix
+}
 #echo "/$PWD"
 #exit 0
 case "$1" in
@@ -341,9 +362,6 @@ check-env|environment)
     ;;
 set-env)
     set-env
-    ;;
-self-destroy)
-    self-destroy
     ;;
 *)
     if [ ! -z $(type -t $FUNCTION | grep function) ]; then

@@ -1,6 +1,12 @@
 version: '2'
 services:
   nginx:
+    image: "yupe-nginx:1.2"
+    restart: always
+    depends_on:
+      - php
+    links:
+      - php
     build:
       context: ./
       dockerfile: "./docker/source/nginx/prod/Dockerfile"
@@ -11,35 +17,70 @@ services:
     expose:
       - "80"
     ports:
-      - "${EXTERNAL_WEB_PROD_PORT}:80"
-    env_file:
-      - "./docker/env/prod/APP_ENV.env"
-      - "./docker/env/prod/VIRTUAL_HOST.env"
+      - "7781:80"
+    environment:
+      VIRTUAL_HOST: "yupe-docker.ru"
+      APP_ENV: "prod"
+    networks:
+      - web
+    labels:
+      - "traefik.backend=nginx"
+      - "traefik.frontend.rule=Host:yupe.ru"
   db:
+    image: "yupe-db-prod:1.2"
+    restart: always
     build:
       context: ./
       dockerfile: "./docker/source/mariadb/prod/Dockerfile"
     volumes:
       - "db_data:/var/lib/mysql"
       - "./docker/source/mariadb/db_dump/db_yupe:/docker-entrypoint-initdb.d"
-    env_file:
-      - "./docker/env/prod/db.env"
+    environment:
+      MYSQL_ROOT_PASSWORD: "123"
+      MYSQL_USER: "yupe"
+      MYSQL_DATABASE: "db_yupe"
+      MYSQL_PASSWORD: "123"
+    networks:
+      - web
+    labels:
+      - "traefik.backend=db"
   php:
-    image: "${APP_NAME}-php-prod:${TAG}"
+    image: "yupe-php-prod:1.2"
     build:
       context: ./
       dockerfile: "./docker/source/php/prod/Dockerfile"
+    restart: always
+    links:
+      - redis:cache
+      - db:db
+    depends_on:
+      - redis
+      - db
     volumes:
       - "./app/yupe:/app"
-      - "./docker/source/php/prod/app/protected/config:/app/protected/config:rw"
-    env_file:
-      - "./docker/env/prod/APP_ENV.env"
-  adminer:
+    environment:
+      APP_ENV: "prod"
+    restart: always
+    links:
+      - redis:cache
+      - db:db
+    depends_on:
+      - redis
+      - db
+    networks:
+      - web
+    labels:
+      - "traefik.backend=php"
+  redis:
+    image: "yupe-redis:1.2"
     build:
       context: ./
-      dockerfile: "./docker/source/adminer/Dockerfile"
-    ports:
-      - "${EXTERNAL_ADMINER_PROD_PORT}:80"
+      dockerfile: "./docker/source/redis/Dockerfile"
+    restart: always
 volumes:
   db_data:
     external: false
+networks:
+  web:
+    external:
+      name: traefik_webgateway
