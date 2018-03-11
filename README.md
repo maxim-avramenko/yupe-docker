@@ -121,7 +121,7 @@ xDebug
 ------
 Для использования xDebug необходимо настроить PhpStorm:
 
-![yupe xdebug screen text https://github.com/maxim-avramenko/yupe-docker/tree/master/docker/img/server.png](https://github.com/maxim-avramenko/yupe-docker/tree/master/docker/img/server.png)
+![yupe xdebug screen text https://raw.githubusercontent.com/maxim-avramenko/yupe-docker/master/docker/img/server.png](https://raw.githubusercontent.com/maxim-avramenko/yupe-docker/master/docker/img/server.png)
 
 Документация:
 ------------
