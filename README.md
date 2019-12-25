@@ -37,7 +37,7 @@
     usage:
     
     Init application with one command:
-        ./yupe set-env dev && ./yupe init
+        ./yupe set-env dev && ./yupe init && ./yupe start
     
     description:
     Environment commands:
@@ -72,7 +72,7 @@ See ./yupe --help to read about all commands.
     
 Для Быстрого старта выполните в консоле:
     
-    ./yupe set-env dev && ./yupe init
+    ./yupe set-env dev && ./yupe init && ./yupe start
     
 Скрипт создает dev окружение, скачивает, устанавливает и запускает Yupe!
 1.3 для dev [http://localhost:7771](http://localhost:7771), для prod
