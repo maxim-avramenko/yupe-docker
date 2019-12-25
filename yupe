@@ -219,7 +219,8 @@ logs(){
 }
 
 init(){
-    build-nocache
+    build
+    start
     create
     fix
 }
