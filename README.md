@@ -6,7 +6,7 @@
     
     sudo nano /etc/hosts
     
-    127.0.0.1   yupe.local
+    127.0.0.1   yupe.loc
 
 Быстрый старт Yupe! CMF в dev окружении с мониторами grafana, prometheus, alertmanager, nodeexporter, cadvisor:
 
@@ -44,31 +44,12 @@
     
     Yupe 1.2:
         create            - create Yupe!1.1 application in ./app directory with --no-install key, just create
-        start-app         - start application environment
-        stop-app          - stop application environment
-        ps-app            - list of working containers in current environment
-        restart-app       - restart application environment
+        start             - start application environment
+        stop              - stop application environment
+        ps                - list of working containers in current environment
+        restart           - restart application environment
         update            - composer update  --lock
         migrate           - php yii migrate --interactive=0
-    
-    Grafana monitor:
-        get-monitor       - get Grafana and monitors
-        start-monitor     - start Grafana and monitors
-        stop-monitor      - stop Grafana and monitors
-        restart-monitor   - restart Grafana and monitors
-        ps-monitor        - list of working containers Grafana and monitors
-    
-    Yupe 1.2 + Proxy:
-        start-app-proxy   - start application environment with proxy
-        stop-app-proxy    - stop application environment with proxy
-        restart-app-proxy - restart application environment with proxy
-        ps-app-proxy      - list of working containers in current environment with proxy
-    
-    Yupe 1.2 + Proxy + Grafana:
-        start-all         - start Yupe 1.2 + Proxy + Grafana applications environment with proxy
-        stop-all          - stop Yupe 1.2 + Proxy + Grafana applications environment with proxy
-        restart-all       - restart Yupe 1.2 + Proxy + Grafana applications environment with proxy
-        ps-all            - list of working containers Yupe 1.2 + Proxy + Grafana in current environment with proxy
     
     Fixing application chown and chmod:
         fix-chown         - change owner to current user (only on Linux and Mac OS) Windows dont need this
@@ -88,7 +69,10 @@ See ./yupe --help to read about all commands.
     
     ./yupe set-env dev && ./yupe init
     
-Скрипт создает dev окружение, скачивает и запускает Yupe! на [http://localhost:7771](http://localhost:7771) или [http://yupe.local](http://yupe.local)
+Скрипт создает dev окружение, скачивает, устанавливает и запускает Yupe!
+1.3 для dev [http://localhost:7771](http://localhost:7771), для prod
+[http://localhost:7781](http://localhost:7781) или
+[http://yupe.loc](http://yupe.loc)
 
 
 После выполнения команды ./yupe set-env dev && ./yupe init будет вот такая картинка
@@ -106,7 +90,7 @@ See ./yupe --help to read about all commands.
 - Use the OpenSSL library
 - Checkout as-is, commit Unix-style endings (ВАЖНО! Без этого Windows стянет bash скрипт и изменит перенос строк файлов проекта, при сборке контейнеров выдаст ошибку о том что файлы имеют Windows перенос строк)
 - Настройка доменов происходит в файлах dev.yml и prod.yml, так же возможно изменить порты по которым будет отвечать проект
-- Установить adminer.php можно с помощью команды ./yupe install-adminer (будет доступен по ссылке http://yupe.local/adminer.php)
+- Установить adminer.php можно с помощью команды ./yupe install-adminer (будет доступен по ссылке http://yupe.loc/adminer.php)
 
 
 Настройка подключения к БД (указываем при установке приложения)

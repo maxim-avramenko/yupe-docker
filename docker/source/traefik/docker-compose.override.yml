@@ -1,0 +1,23 @@
+version: '3'
+services:
+
+  proxy:
+    networks:
+      - project21
+      - selenoid
+      - dev_network
+      - monitoring
+      - traefik
+
+networks:
+  project21:
+    external: true
+  selenoid:
+    external: true
+  dev_network:
+    external: true
+  monitoring:
+    external: true
+  traefik:
+    external: true
+

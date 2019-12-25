@@ -1,17 +1,16 @@
-version: '2'
+version: '3'
 services:
+
   nginx:
-    image: "yupe-nginx:1.2"
+    image: "yupe-nginx:1.17"
     restart: always
     depends_on:
       - php
-    links:
-      - php
     build:
-      context: ./
-      dockerfile: "./docker/source/nginx/prod/Dockerfile"
+      context: "./docker/source/nginx/prod"
+      dockerfile: "./Dockerfile"
     volumes:
-      - "./app/yupe:/app"
+      - "./app:/app"
       - "./docker/source/nginx/prod/conf.d:/etc/nginx/conf.d:ro"
       - "./docker/logs/prod:/var/log/nginx"
     expose:
@@ -19,19 +18,23 @@ services:
     ports:
       - "7781:80"
     environment:
-      VIRTUAL_HOST: "yupe-docker.ru"
+      VIRTUAL_HOST: "yupe.loc"
       APP_ENV: "prod"
     networks:
-      - web
+      - traefik
     labels:
-      - "traefik.backend=nginx"
-      - "traefik.frontend.rule=Host:yupe.ru"
+      - "traefik.frontend.rule=Host:yupe.loc"
+      - "traefik.enable=true"
+      - "traefik.port=80"
+      - "traefik.docker.network=traefik"
+      - "traefik.frontend.passHostHeader=true"
+
   db:
-    image: "yupe-db-prod:1.2"
+    image: "yupe-db:1.17.4"
     restart: always
     build:
-      context: ./
-      dockerfile: "./docker/source/mariadb/prod/Dockerfile"
+      context: "./docker/source/mariadb/prod"
+      dockerfile: "./Dockerfile"
     volumes:
       - "db_data:/var/lib/mysql"
       - "./docker/source/mariadb/db_dump/db_yupe:/docker-entrypoint-initdb.d"
@@ -41,14 +44,16 @@ services:
       MYSQL_DATABASE: "db_yupe"
       MYSQL_PASSWORD: "123"
     networks:
-      - web
+      - traefik
     labels:
-      - "traefik.backend=db"
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik"
+
   php:
-    image: "yupe-php-prod:1.2"
+    image: "yupe-php:7.0-fpm"
     build:
-      context: ./
-      dockerfile: "./docker/source/php/prod/Dockerfile"
+      context: "./docker/source/php/prod"
+      dockerfile: "./Dockerfile"
     restart: always
     links:
       - redis:cache
@@ -57,30 +62,29 @@ services:
       - redis
       - db
     volumes:
-      - "./app/yupe:/app"
+      - "./app:/app"
     environment:
       APP_ENV: "prod"
-    restart: always
-    links:
-      - redis:cache
-      - db:db
-    depends_on:
-      - redis
-      - db
+      YII_TRACE_LEVEL: 0
+      YII_DEBUG: 0
     networks:
-      - web
+      - traefik
     labels:
-      - "traefik.backend=php"
+      - "traefik.enable=true"
+      - "traefik.port=9000"
+      - "traefik.docker.network=traefik"
+
   redis:
-    image: "yupe-redis:1.2"
-    build:
-      context: ./
-      dockerfile: "./docker/source/redis/Dockerfile"
+    image: "redis:5.0"
     restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik"
+
 volumes:
   db_data:
     external: false
+
 networks:
-  web:
-    external:
-      name: traefik_webgateway
+  traefik:
+    external: true
