@@ -8,9 +8,14 @@
     
     127.0.0.1   yupe.loc
 
-Быстрый старт Yupe! CMF в dev окружении с мониторами grafana, prometheus, alertmanager, nodeexporter, cadvisor:
+Быстрый старт Yupe! CMF в dev окружении:
 
-    git clone https://github.com/maxim-avramenko/yupe-docker.git && cd yupe-docker && chmod +x yupe && ./yupe set-env dev && ./yupe get-monitor && ./yupe init && ./yupe start-all
+    git clone https://github.com/maxim-avramenko/yupe-docker.git && \
+    cd yupe-docker && \
+    chmod +x yupe && \
+    ./yupe set-env dev && \
+    ./yupe init && \
+    ./yupe start
 
 Для заупска bash скрипта управления Yupe приложением в Docker контейнерах необходимо дать файлу "yupe" права на исполнение:
 
@@ -42,7 +47,7 @@
         build             - build docker containers for application
         build-nocache     - force build docker containers for application without docker cached images
     
-    Yupe 1.2:
+    Yupe 1.3:
         create            - create Yupe!1.1 application in ./app directory with --no-install key, just create
         start             - start application environment
         stop              - stop application environment
