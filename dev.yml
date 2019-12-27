@@ -10,7 +10,7 @@ services:
       context: "./docker/source/nginx/dev"
       dockerfile: "./Dockerfile"
     volumes:
-      - "./app:/app"
+      - "./app:/var/www/app:rw"
       - "./docker/source/nginx/dev/conf.d:/etc/nginx/conf.d:ro"
       - "./docker/logs/dev:/var/log/nginx"
     expose:
@@ -26,6 +26,7 @@ services:
       - "traefik.frontend.rule=Host:yupe.loc"
       - "traefik.enable=true"
       - "traefik.port=80"
+      - "traefik.backend=yupe-nginx"
       - "traefik.docker.network=traefik"
       - "traefik.frontend.passHostHeader=true"
 
@@ -45,7 +46,7 @@ services:
     networks:
       - traefik
     labels:
-      - "traefik.backend=db"
+      - "traefik.backend=yupe-db"
       - "traefik.enable=true"
       - "traefik.docker.network=traefik"
 
@@ -54,38 +55,45 @@ services:
     build:
       context: "./docker/source/php/dev"
       dockerfile: "./Dockerfile"
+      args:
+        USER: "${USER}"
     restart: always
+    hostname: "yupe.loc"
     depends_on:
       - redis
       - db
     volumes:
-      - "./app:/app"
+      - "./app:/var/www/app:rw"
+      - "yupe-composer:/var/www/.composer"
     environment:
       PHP_IDE_CONFIG: "serverName=yupe.loc"
-      APP_ENV: "dev"
       XDEBUG_CONFIG: "remote_host=172.17.0.1"
+      APP_ENV: "dev"
       YII_TRACE_LEVEL: 3
       YII_DEBUG: 1
     networks:
       - traefik
+    user: "${USER}"
     labels:
       - "traefik.backend=yupe-php"
       - "traefik.enable=true"
       - "traefik.port=9000"
       - "traefik.docker.network=traefik"
-
+    working_dir: "/var/www/app/yupe"
   redis:
     image: "redis:5.0"
     restart: always
     networks:
       - traefik
     labels:
-      - "traefik.backend=redis"
+      - "traefik.backend=yupe-redis"
       - "traefik.enable=true"
       - "traefik.docker.network=traefik"
 
 volumes:
   db_data:
+    external: false
+  yupe-composer:
     external: false
 
 networks:

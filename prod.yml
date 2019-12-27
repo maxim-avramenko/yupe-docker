@@ -10,7 +10,7 @@ services:
       context: "./docker/source/nginx/prod"
       dockerfile: "./Dockerfile"
     volumes:
-      - "./app:/app"
+      - "./app:/var/www"
       - "./docker/source/nginx/prod/conf.d:/etc/nginx/conf.d:ro"
       - "./docker/logs/prod:/var/log/nginx"
     expose:
@@ -27,17 +27,17 @@ services:
       - "traefik.enable=true"
       - "traefik.port=80"
       - "traefik.docker.network=traefik"
+      - "traefik.backend=yupe-nginx"
       - "traefik.frontend.passHostHeader=true"
 
   db:
-    image: "yupe-db:1.17.4"
+    image: "yupe-db:10.4"
     restart: always
     build:
       context: "./docker/source/mariadb/prod"
       dockerfile: "./Dockerfile"
     volumes:
       - "db_data:/var/lib/mysql"
-      - "./docker/source/mariadb/db_dump/db_yupe:/docker-entrypoint-initdb.d"
     environment:
       MYSQL_ROOT_PASSWORD: "123"
       MYSQL_USER: "yupe"
@@ -48,23 +48,27 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik"
+      - "traefik.backend=yupe-db"
 
   php:
     image: "yupe-php:7.0-fpm"
     build:
       context: "./docker/source/php/prod"
       dockerfile: "./Dockerfile"
+      args:
+        USER: "${USER}"
     restart: always
-    links:
-      - redis:cache
-      - db:db
+    hostname: "yupe.loc"
     depends_on:
       - redis
       - db
     volumes:
-      - "./app:/app"
+      - "./app:/var/www/app:rw"
+      - "yupe-composer:/var/www/.composer"
     environment:
-      APP_ENV: "prod"
+      PHP_IDE_CONFIG: "serverName=yupe.loc"
+      XDEBUG_CONFIG: "remote_host=172.17.0.1"
+      APP_ENV: "dev"
       YII_TRACE_LEVEL: 0
       YII_DEBUG: 0
     networks:
@@ -73,17 +77,21 @@ services:
       - "traefik.enable=true"
       - "traefik.port=9000"
       - "traefik.docker.network=traefik"
-
+    working_dir: "/var/www/app/yupe"
   redis:
     image: "redis:5.0"
     restart: always
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik"
+      - "traefik.backend=yupe-redis"
 
 volumes:
   db_data:
     external: false
+  yupe-composer:
+    external: false
+
 
 networks:
   traefik:
