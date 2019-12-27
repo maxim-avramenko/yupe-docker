@@ -14,13 +14,19 @@
     cd yupe-docker && \
     chmod +x yupe && \
     ./yupe set-env dev && \
-    ./yupe init && \
-    ./yupe start
+    ./yupe init
 
 Для заупска bash скрипта управления Yupe приложением в Docker контейнерах необходимо дать файлу "yupe" права на исполнение:
 
         chmod +x yupe
 
+Для остановки окружения:
+
+    ./yupe stop
+    
+Для старта приложения:
+    
+    ./yupe start
 
 Для работы с репозиторием необходимы:
 - [Docker](https://docs.docker.com/engine/installation/)
