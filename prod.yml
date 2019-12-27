@@ -10,7 +10,7 @@ services:
       context: "./docker/source/nginx/prod"
       dockerfile: "./Dockerfile"
     volumes:
-      - "./app:/var/www"
+      - "./app:/var/www/app:rw"
       - "./docker/source/nginx/prod/conf.d:/etc/nginx/conf.d:ro"
       - "./docker/logs/prod:/var/log/nginx"
     expose:
@@ -66,21 +66,23 @@ services:
       - "./app:/var/www/app:rw"
       - "yupe-composer:/var/www/.composer"
     environment:
-      PHP_IDE_CONFIG: "serverName=yupe.loc"
-      XDEBUG_CONFIG: "remote_host=172.17.0.1"
-      APP_ENV: "dev"
+      APP_ENV: "prod"
       YII_TRACE_LEVEL: 0
       YII_DEBUG: 0
     networks:
       - traefik
     labels:
+      - "traefik.backend=yupe-php"
       - "traefik.enable=true"
       - "traefik.port=9000"
       - "traefik.docker.network=traefik"
     working_dir: "/var/www/app/yupe"
+
   redis:
     image: "redis:5.0"
     restart: always
+    networks:
+      - traefik
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik"
