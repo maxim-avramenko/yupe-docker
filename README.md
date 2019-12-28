@@ -12,15 +12,14 @@
 
     git clone https://github.com/maxim-avramenko/yupe-docker.git && \
     cd yupe-docker && \
-    chmod +x yupe && \
     ./yupe set-env dev && \
     ./yupe init
 
 Для заупска bash скрипта управления Yupe приложением в Docker контейнерах необходимо дать файлу "yupe" права на исполнение:
 
-        chmod +x yupe
+    chmod +x yupe
 
-Для остановки окружения:
+Для остановки приложения:
 
     ./yupe stop
     
@@ -54,35 +53,23 @@
         build-nocache     - force build docker containers for application without docker cached images
     
     Yupe 1.3:
-        create            - create Yupe!1.1 application in ./app directory with --no-install key, just create
-        start             - start application environment
-        stop              - stop application environment
-        ps                - list of working containers in current environment
-        restart           - restart application environment
+        create            - create Yupe!1.3 application
+        start             - start yupe
+        stop              - stop yupe
+        ps                - yupe:1.3 service list
+        restart           - restart yupe
         update            - composer update  --lock
         migrate           - php yii migrate --interactive=0
-    
-    Fixing application chown and chmod:
-        fix-chown         - change owner to current user (only on Linux and Mac OS) Windows dont need this
-        fix-chmod         - change a+rw assets, upload, runtime, config e.t.c.
-        fix               - fix-chown and fix-chmod
-    
-    
-    Для определения в каком окружении должно работать приложение выполните: ./yupe set-env [ dev | prod ]
 
+Для определения в каком окружении должно работать приложение выполните: 
 
-
-Для определения в каком окружении должно работать приложение выполните: ./yupe set-env [ dev | prod ]
+    ./yupe set-env [ dev | prod ]
 
 See ./yupe --help to read about all commands.
     
-Для Быстрого старта выполните в консоле:
-    
-    ./yupe set-env dev && ./yupe init && ./yupe start
-    
-Скрипт создает dev окружение, скачивает, устанавливает и запускает Yupe!
-1.3 для dev [http://localhost:7771](http://localhost:7771), для prod
-[http://localhost:7781](http://localhost:7781) или
+
+[http://localhost:7771](http://localhost:7771)
+[http://localhost:7781](http://localhost:7781)
 [http://yupe.loc](http://yupe.loc)
 
 
